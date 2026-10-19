@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "multi-provider-llm-chatbot"
+version = "0.1.0"
+description = "Modular multi-provider LLM chatbot: Google GenAI, Anthropic & OpenAI SDK adapters, retry/fallback resilience, structured Pydantic outputs, token cost tracking, Streamlit UI"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "Adwitiya Pandey", email = "76179646+adwitiya-pandey@users.noreply.github.com" }
+]
+dependencies = [
+    "anthropic>=0.40.0",
+    "google-genai>=1.0.0",
+    "openai>=1.50.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.7.0",
+    "python-dotenv>=1.0.0",
+    "streamlit>=1.40.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.8.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/chatbot"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP"]
+
+[tool.coverage.run]
+source = ["src/chatbot"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 85
