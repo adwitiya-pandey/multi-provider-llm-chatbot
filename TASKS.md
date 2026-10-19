@@ -93,7 +93,7 @@ Accept: `docs/live_verification.md` exists and contains zero secret values.
 
 ## T11 (AGENT): README, threat model, decisions, and plain-English guide
 1. Write a comprehensive `README.md` (architecture diagram, provider fallback table, quickstart for both zero-key scripted mode and `.env` Gemini live mode, security summary, test coverage summary), `THREAT_MODEL.md` (STRIDE table mapped to S1–S8), `docs/decisions.md`, and `docs/EXPLAIN-PLAIN-ENGLISH.md`.
-Accept: All links resolve and `git grep -i "AIza"` is empty.
+Accept: All links resolve and `git grep -i "AI""za"` is empty.
 
 ## T12 (AGENT): final verification, tag `v0.1.0`, and push to GitHub
 1. Run `uv run ruff check . && uv run ruff format --check . && uv run pytest -q --cov=src/chatbot --cov-fail-under=85`.

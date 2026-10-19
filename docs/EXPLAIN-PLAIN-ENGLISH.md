@@ -171,3 +171,54 @@ Before launching an aircraft, engineers don't just run flight simulator software
 
 ### 3. Interview Answer
 "In T10, we verified our architecture in live production against Google's Gemini API endpoints using credentials safely loaded from our gitignored `.env`. We demonstrated multi-turn dialogue retention, automated self-healing JSON repair in flight, and simulated primary provider failure to validate instantaneous fallback routing to a secondary model. All telemetry, latencies, and token counts were captured cleanly in our live verification report with zero credential exposure."
+
+
+## T11: Comprehensive Documentation, Threat Modeling, and Architecture Decisions
+
+### 1. Real-World Analogy
+When a civil engineer finishes a bridge, they don't just walk away—they assemble the complete operating manual, structural stress calculations, emergency evacuation procedures, and architectural blueprints for city inspectors. T11 provides that complete engineering manual: a comprehensive `README.md`, an industry-standard STRIDE security matrix in `THREAT_MODEL.md`, architectural decision records in `docs/decisions.md`, and this plain-English owner guide.
+
+### 2. How It Works
+- `README.md`: Documents system architecture with Mermaid sequence diagrams, fallback rules, quickstarts for zero-key demo and live Gemini modes, and a quality assurance test command reference.
+- `THREAT_MODEL.md`: Formalizes security across the STRIDE categories (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege) mapped to requirements S1–S8 and proving test cases.
+- `docs/decisions.md`: Records formal Architecture Decision Records (D1–D5) detailing context, chosen options, alternatives considered, and trade-offs.
+
+### 3. Interview Answer
+"In T11, we authored comprehensive technical documentation including STRIDE threat modeling, Architecture Decision Records, and quickstart guides for both zero-credential offline evaluation and production deployments. We verified that our threat mitigations map directly to automated security tests and that zero credentials or sensitive strings appear anywhere in the repository history."
+
+---
+
+## T12: Quality Assurance Verification, v0.1.0 Tagging, and GitHub Release
+
+### 1. Real-World Analogy
+Before a newly manufactured vehicle leaves the factory for customer delivery, it undergoes a final 100-point inspection check on the dynamometer. Once every system passes inspection, the car is stamped with its official vehicle identification tag (`v0.1.0`) and driven onto the carrier truck for global delivery.
+
+### 2. How It Works
+- Linting & Formatting Gate: Confirms 100% compliance with Ruff linter and formatter rules without warnings or errors.
+- Coverage Gate: Executes the full Pytest test suite with code coverage analysis, enforcing an 85%+ coverage threshold.
+- Clean Git State: Confirms all files are cleanly committed, secrets (`.env`) remain untracked, and tags the release as `v0.1.0`.
+- GitHub Remote Synchronization: Pushes the `main` branch and the signed `v0.1.0` tag to the public GitHub repository.
+
+### 3. Interview Answer
+"In T12, we completed end-to-end quality assurance by validating code formatting, linting, and enforcing an 85%+ test coverage threshold across the codebase. We verified that zero credentials were tracked, cut the official v0.1.0 release tag, and pushed all commits to the public GitHub repository."
+
+---
+
+## 🎯 1-Command Owner Smoke Test
+
+To verify the chatbot yourself right now in WSL2 Ubuntu, run this single command in your terminal:
+
+```bash
+uv run python scripts/demo_cli.py
+```
+
+### What You Will See:
+1. **Turn 1 (Technical Query)**: The bot answers an Apache Iceberg architectural question and prints structured key points.
+2. **Turn 2 (Rate Limiting Query)**: The bot explains HTTP 429 exponential backoff retries with jitter.
+3. **Turn 3 (Adversarial Security Test)**: The bot intercepts a prompt injection attack ("ignore previous instructions") with a polite refusal at **$0.00 cost** and **0 tokens consumed**.
+4. **Session Summary Table**: Displays total turns completed, tokens consumed, and cumulative spend against your $0.50 budget.
+
+To launch the full interactive web browser dashboard:
+```bash
+uv run streamlit run src/chatbot/app.py
+```

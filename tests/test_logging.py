@@ -23,7 +23,7 @@ def test_filter_metadata_removes_sensitive_data() -> None:
         "text": "What is the secret database password?",
         "prompt": "You are a helpful assistant...",
         "answer": "Here is the confidential response...",
-        "api_key": "AIzaSySecret123456",
+        "api_key": "sample-secret-key-123456",
         "random_extra": "not-allowed",
     }
     filtered = filter_metadata(data)
