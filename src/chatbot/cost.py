@@ -8,6 +8,8 @@ from chatbot.models import UsageStats
 DEFAULT_PRICING: dict[str, tuple[float, float]] = {
     "gemini-2.5-flash": (0.15, 0.60),
     "gemini-2.5-flash-lite": (0.075, 0.30),
+    "gemini-3.8-flash": (0.15, 0.60),
+    "gemini-3.5-flash-lite": (0.075, 0.30),
     "claude-3-5-haiku-latest": (0.80, 4.00),
     "gpt-4o-mini": (0.15, 0.60),
     "scripted-demo": (0.15, 0.60),

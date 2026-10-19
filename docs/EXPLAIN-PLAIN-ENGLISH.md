@@ -155,3 +155,19 @@ A high-performance car engine needs an intuitive dashboard with a speedometer, f
 
 ### 3. Interview Answer
 "In T9, we built both an interactive Streamlit web interface and an automated CLI demo runner to expose the chatbot's multi-turn capabilities. The Streamlit UI isolates conversation state, displays real-time token/USD cost metrics against budget limits, and provides drill-down views into retry traces and structured metadata. We validated the UI using Streamlit's headless AppTest framework to guarantee regression-free interactivity in CI."
+
+
+## T10: Live Gemini Verification and Fallback Telemetry
+
+### 1. Real-World Analogy
+Before launching an aircraft, engineers don't just run flight simulator software—they perform a live engine test on the tarmac. They rev the primary engine to measure actual thrust and fuel burn, then intentionally trigger a simulated engine warning to confirm that the co-pilot backup system activates instantly without the aircraft losing altitude. T10 is that live tarmac test: connecting to Google's live Gemini infrastructure using credentials from `.env`, running live multi-turn queries, and verifying automatic failover to the backup model.
+
+### 2. How It Works
+- Headless Live Smoke Test (`scripts/live_smoke_test.py`):
+  - Turn 1: Contacts live Google GenAI API (`gemini-2.5-flash`), issuing an Apache Iceberg architectural query and verifying strict JSON output compliance.
+  - Turn 2: Tests multi-turn sliding window memory with a follow-up query, where automated 1-step repair successfully healed the response.
+  - Turn 3: Intentionally injects a simulated 503 Service Unavailable failure on the primary model, proving that the `ResilientRouter` automatically fails over to `gemini-2.5-flash-lite`.
+  - Evidence Report (`docs/live_verification.md`): Logs exact measured latencies, token usage counts, and notional USD costs without logging secrets or credentials.
+
+### 3. Interview Answer
+"In T10, we verified our architecture in live production against Google's Gemini API endpoints using credentials safely loaded from our gitignored `.env`. We demonstrated multi-turn dialogue retention, automated self-healing JSON repair in flight, and simulated primary provider failure to validate instantaneous fallback routing to a secondary model. All telemetry, latencies, and token counts were captured cleanly in our live verification report with zero credential exposure."

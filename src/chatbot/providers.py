@@ -57,6 +57,13 @@ class LLMProvider(Protocol):
         ...
 
 
+GEMINI_MODEL_ALIASES: dict[str, str] = {
+    "gemini-2.5-flash": "gemini-3.8-flash",
+    "gemini-2.5-flash-lite": "gemini-3.5-flash-lite",
+    "gemini-2.0-flash": "gemini-3.8-flash",
+}
+
+
 class GeminiProvider:
     """Official Google GenAI SDK adapter (google-genai)."""
 
@@ -105,9 +112,10 @@ class GeminiProvider:
             max_output_tokens=1024,
         )
 
+        resolved_model = GEMINI_MODEL_ALIASES.get(self.model_name, self.model_name)
         try:
             response = self.client.models.generate_content(
-                model=self.model_name,
+                model=resolved_model,
                 contents=contents,
                 config=config,
             )

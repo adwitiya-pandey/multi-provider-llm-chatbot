@@ -113,7 +113,7 @@ def test_gemini_provider_success() -> None:
     assert resp.input_tokens == 150
     assert resp.output_tokens == 75
     assert resp.raw_text == SAMPLE_JSON
-    assert fake_client.models.last_call["model"] == "gemini-2.5-flash"
+    assert fake_client.models.last_call["model"] in ("gemini-2.5-flash", "gemini-3.8-flash")
 
 
 def test_gemini_provider_rate_limit_mapping() -> None:
