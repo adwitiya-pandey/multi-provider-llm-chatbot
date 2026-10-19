@@ -123,3 +123,16 @@ Think of an editor at a publishing house. First, the security guard at the door 
 
 ### 3. Interview Answer
 "In T7, we tied together the entire conversational pipeline in ChatOrchestrator, implementing defense-in-depth against prompt injection and schema non-compliance. Known adversarial inputs short-circuit deterministically with zero model invocation, eliminating API cost. For schema malformations, we built a 1-step automated repair loop followed by an unbreakable fallback reply, guaranteeing that downstream consumer interfaces never crash on malformed LLM outputs."
+
+
+## T8: Security Guardrails and AST Import Boundary Verification
+
+### 1. Real-World Analogy
+Imagine a bank with strict physical security rules: armored cars are only allowed in the underground loading bay, never in the executive dining room or teller lobby. AST (Abstract Syntax Tree) boundary testing is like an automated building inspector who scans the blueprints of every room to confirm that heavy machinery and external dependencies only enter through their one designated loading dock (`providers.py`), and that banned, unvetted contractor equipment (`langchain`, `llama_index`, `litellm`) is never allowed on the premises.
+
+### 2. How It Works
+- `tests/test_boundaries.py`: Uses Python's native `ast` parser to parse every `.py` file in the codebase. It mathematically proves that provider SDKs (`google.genai`, `anthropic`, `openai`) are imported strictly inside `providers.py` and nowhere else. It also verifies that wrapper frameworks like LangChain, LlamaIndex, or LiteLLM are completely absent.
+- `tests/test_security.py`: Programmatically asserts all S1–S8 requirements: verifies `.env` exclusion in `.gitignore`, ensures `.env.example` has no real API keys, checks that `SecretStr` never leaks secrets in `str()` or `repr()`, and ensures that ambient developer credentials are removed during test runs.
+
+### 3. Interview Answer
+"In T8, we created static AST boundary analysis tests that enforce architectural layering, guaranteeing that provider SDKs cannot leak outside their adapter module. We also banned heavyweight third-party wrapper frameworks to keep our dependency footprint lean and maintain direct control over API calls. Finally, automated security tests verify that credentials can never be exposed in tracebacks, logs, or repository files."
