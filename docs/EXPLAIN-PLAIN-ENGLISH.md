@@ -34,3 +34,17 @@ Setting up a professional workshop requires laying out the toolboxes, installing
 
 ### 3. Interview Answer
 "In T1, we established the dependency architecture using uv and structured the package around modular single-responsibility components. We instituted an automated CI workflow that tests against Python 3.12 with an 85% coverage gate. Crucially, we set up test isolation in conftest to ensure zero credential leakage and zero network calls during unit testing."
+
+
+## T2: Data Models, Configuration Loader, and Metadata-Only Logging
+
+### 1. Real-World Analogy
+Think of a customs border checkpoint. Guards inspect documents against strict templates (`models.py`)—if someone tries to sneak an extra unauthorized item through, it is immediately confiscated (`extra="forbid"`). The commander's security badge and radio frequencies (`config.py`) are locked in a tamper-proof case (`SecretStr`), and the daily public ledger (`logging_setup.py`) records the time, vehicle ID, and stamp number, but never the private contents of the traveler's luggage.
+
+### 2. How It Works
+- `models.py`: Defines immutable, strictly typed Pydantic models for user messages, provider responses, and turn results. It enforces constraints like character limits, regex patterns on IDs (`TURN-0001`), and bounds on lists.
+- `config.py`: Reads settings from `.env` using Pydantic Settings. Sensitive API keys are wrapped in `SecretStr` so they never accidentally print in console logs or tracebacks. If a `GEMINI_API_KEY` is present, it automatically enables `live` mode; otherwise, it seamlessly defaults to offline `scripted` mode.
+- `logging_setup.py`: Formats audit events as single-line JSON. It strictly enforces a whitelist of metadata fields (e.g. `turn_id`, `tokens`, `cost_usd`, `latency_ms`) and aggressively purges prompt text, model answers, or credential strings.
+
+### 3. Interview Answer
+"In T2, we implemented strict Pydantic v2 schemas with `extra='forbid'` to ensure deterministic serialization and parse validation. We engineered the configuration module to mask API keys using `SecretStr` and automatically determine the runtime mode based on key presence. Finally, we built a metadata-only audit logger that mathematically prevents data leakage by whitelisting operational telemetry and stripping prompt contents."
