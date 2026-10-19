@@ -92,3 +92,19 @@ Imagine traveling internationally with American, British, and European electroni
 
 ### 3. Interview Answer
 "In T5, we implemented native SDK adapters adhering to a unified ProviderClient protocol across Google GenAI, Anthropic, and OpenAI. We eliminated third-party abstraction bloat and standardized exception handling into typed retryable and non-retryable error classes. We also built an offline Scripted adapter and client injection mechanisms to enable comprehensive offline testability."
+
+
+## T6: Exponential Backoff Retry and Automatic Fallback Router
+
+### 1. Real-World Analogy
+Imagine calling a busy customer service line. If you get a busy signal (HTTP 429 rate limit or 503 server error), you wait 1 minute, then 2 minutes, then 4 minutes before trying again (exponential backoff). If your keycard is invalid (HTTP 401 unauthorized), retrying is pointless—so you immediately walk over to the backup help desk (fallback provider). If all desks are closed, the front office logs a clear, safe summary of which desks failed and why (`AllProvidersFailedError`).
+
+### 2. How It Works
+- `ResilientRouter`: Coordinates calling primary and backup LLM providers.
+- Exponential Backoff: For transient, retryable errors (429, 500, 503, timeouts), it retries up to 3 times on the current provider with doubling delays (`1.0s, 2.0s, 4.0s`).
+- Immediate Fallback: For fatal client errors (401 invalid key, missing API key), it bypasses useless retries and switches immediately to the next provider in the chain.
+- Dependency Injected Clock: Accepts an injectable `sleep_fn`, allowing full retry sequence tests to execute in 0ms without slowing down CI.
+- Auditable Tracing: Records every attempt with latency, provider, model, and sanitized status.
+
+### 3. Interview Answer
+"In T6, we engineered a resilience router that differentiates transient infrastructure faults from permanent authentication errors. It executes exponential backoff retries with doubling delays on 429 and 5xx errors while immediately cascading to fallback providers on 401s or retry exhaustion. By injecting a clock sleep function, we verify complex multi-provider failure state transitions deterministically in zero milliseconds."
