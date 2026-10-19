@@ -75,3 +75,20 @@ Imagine having an active conversation while taking notes on a single whiteboard 
 
 ### 3. Interview Answer
 "In T4, we engineered a dual-bounded sliding-window memory system that prevents token context blowups through turn-count and character-ratio eviction policies. In tandem, we introduced a real-time financial tracking engine with a hard circuit-breaker ceiling ($0.50). This guarantees cost predictability and eliminates unbounded token consumption in multi-turn dialogues."
+
+
+## T5: Multi-Provider SDK Adapters (Google GenAI, Anthropic, OpenAI, Scripted)
+
+### 1. Real-World Analogy
+Imagine traveling internationally with American, British, and European electronic devices. Instead of carrying different wall sockets for every country, you use a universal power travel adapter. `providers.py` is that universal adapter: whether talking to Google Gemini, Anthropic Claude, or OpenAI GPT, every provider accepts the exact same message format and returns the exact same structured response object (`ProviderResponse`), while translating SDK-specific exceptions into normalized error codes.
+
+### 2. How It Works
+- Direct SDK Adapters: Integrates directly with official SDKs (`google-genai`, `anthropic`, `openai`) without intermediary wrapper frameworks like LangChain or LiteLLM.
+- Error Normalization: SDK exceptions are caught and classified into `ProviderError`:
+  - `429` (Rate limits) and `5xx` (Server errors) are marked `retryable=True`.
+  - `401/403` (Authentication/Authorization) and `400` (Bad requests) are marked `retryable=False`.
+- `ScriptedProvider`: An offline provider requiring zero API keys and zero internet access, returning deterministic JSON with realistic token counts for rapid offline demos and automated CI testing.
+- Dependency Injection: All adapters accept an optional `sdk_client` parameter, enabling 100% offline unit testing with zero network requests.
+
+### 3. Interview Answer
+"In T5, we implemented native SDK adapters adhering to a unified ProviderClient protocol across Google GenAI, Anthropic, and OpenAI. We eliminated third-party abstraction bloat and standardized exception handling into typed retryable and non-retryable error classes. We also built an offline Scripted adapter and client injection mechanisms to enable comprehensive offline testability."
