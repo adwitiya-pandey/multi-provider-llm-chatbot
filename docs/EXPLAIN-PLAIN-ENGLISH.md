@@ -62,3 +62,16 @@ Imagine a secure government facility with an airlock security chamber. When visi
 
 ### 3. Interview Answer
 "In T3, we built an input security layer that strips non-printable control characters, caps input length, and wraps user prompts in explicit boundary tags. We coupled this with a deterministic prompt injection detector that intercepts adversarial jailbreaks at zero token cost. We also established file-based prompt templates with strict placeholder validation to ensure deterministic schema compliance."
+
+
+## T4: Sliding-Window Multi-Turn Memory and Token/Cost Tracking
+
+### 1. Real-World Analogy
+Imagine having an active conversation while taking notes on a single whiteboard with limited space. Once the board fills up, you erase the oldest notes at the top to make room for new insights, ensuring you never run out of room while still keeping recent context fresh (`ConversationMemory`). At the same time, you have an automated electric meter measuring every kilowatt-hour used and a circuit breaker that trips if your power bill reaches $0.50 (`CostTracker`).
+
+### 2. How It Works
+- `memory.py`: Implements a bounded sliding-window conversation buffer. It tracks both turn count (e.g. maximum 10 turns) and conservative token estimates (`max(1, len(text) // 4)`). If either limit is exceeded when a new turn is added, the oldest turns are evicted first (FIFO). It exports messages directly into the list-of-dicts format required by LLM providers.
+- `cost.py`: Implements the `CostTracker` with official model pricing per 1M tokens (e.g., $0.15 input / $0.60 output for Gemini 2.5 Flash). It records usage per turn and maintains running cumulative totals for turns, tokens, and USD cost by provider. If cumulative spend reaches the configured session budget ($0.50 default), `check_budget()` raises `BudgetExceededError` before any model is invoked.
+
+### 3. Interview Answer
+"In T4, we engineered a dual-bounded sliding-window memory system that prevents token context blowups through turn-count and character-ratio eviction policies. In tandem, we introduced a real-time financial tracking engine with a hard circuit-breaker ceiling ($0.50). This guarantees cost predictability and eliminates unbounded token consumption in multi-turn dialogues."
