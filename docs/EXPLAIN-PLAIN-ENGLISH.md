@@ -136,3 +136,22 @@ Imagine a bank with strict physical security rules: armored cars are only allowe
 
 ### 3. Interview Answer
 "In T8, we created static AST boundary analysis tests that enforce architectural layering, guaranteeing that provider SDKs cannot leak outside their adapter module. We also banned heavyweight third-party wrapper frameworks to keep our dependency footprint lean and maintain direct control over API calls. Finally, automated security tests verify that credentials can never be exposed in tracebacks, logs, or repository files."
+
+
+## T9: Streamlit Web UI and CLI Demo Runner
+
+### 1. Real-World Analogy
+A high-performance car engine needs an intuitive dashboard with a speedometer, fuel gauge, and check-engine warning lights so the driver can monitor everything in real time. `app.py` is the dashboard: it gives users a clean chat screen while displaying real-time metrics in the sidebar (budget gauge, token consumption, provider chain status) and expandable inspection trays for every turn (confidence score, key points, follow-ups, and failure retry traces).
+
+### 2. How It Works
+- Streamlit Web App (`app.py`):
+  - Sidebar: Features a live status indicator (`LIVE GEMINI` vs. `SCRIPTED OFFLINE DEMO`), a provider chain dropdown, financial telemetry against a strict $0.50 budget ceiling, a per-provider cost table, and a memory reset button.
+  - Chat Window: Renders user and assistant messages with badge indicators (`[TECHNICAL]`, `[REPAIRED]`, `[FALLBACK]`, `[REFUSAL]`).
+  - Metadata Tray: An expandable drawer underneath each message revealing the model's confidence rating, extracted bullet points, recommended follow-ups, and an attempt-by-attempt network audit trace.
+- CLI Demo Runner (`scripts/demo_cli.py`):
+  - Executes a scripted 3-turn interactive run demonstrating technical domain queries, rate limiting concepts, and adversarial prompt injection interception.
+- AppTest Suite (`tests/test_app.py`):
+  - Uses Streamlit's official headless test harness `AppTest` to verify initial rendering, user input processing, prompt injection refusal rendering, and session memory clearing.
+
+### 3. Interview Answer
+"In T9, we built both an interactive Streamlit web interface and an automated CLI demo runner to expose the chatbot's multi-turn capabilities. The Streamlit UI isolates conversation state, displays real-time token/USD cost metrics against budget limits, and provides drill-down views into retry traces and structured metadata. We validated the UI using Streamlit's headless AppTest framework to guarantee regression-free interactivity in CI."
