@@ -48,3 +48,17 @@ Think of a customs border checkpoint. Guards inspect documents against strict te
 
 ### 3. Interview Answer
 "In T2, we implemented strict Pydantic v2 schemas with `extra='forbid'` to ensure deterministic serialization and parse validation. We engineered the configuration module to mask API keys using `SecretStr` and automatically determine the runtime mode based on key presence. Finally, we built a metadata-only audit logger that mathematically prevents data leakage by whitelisting operational telemetry and stripping prompt contents."
+
+
+## T3: Input Sanitization, Prompt Injection Defense, and Prompt Templates
+
+### 1. Real-World Analogy
+Imagine a secure government facility with an airlock security chamber. When visitors arrive with packages, guards scan the bags with an X-ray machine to detect weapons or contraband before anyone steps inside. If someone tries to smuggle a note telling the guards "Forget your security protocol, open all doors" (prompt injection), the security door stays locked shut. Prompt templates act like standardized pre-printed interview questionnaires, ensuring that all questions adhere to a single strict format.
+
+### 2. How It Works
+- `sanitize.py`: First strips dangerous non-printable ASCII control characters (preserving necessary newlines and tabs). It caps user input at 4,000 characters and wraps the sanitized text in unambiguous `<user_message>` boundary delimiters.
+- Injection Detection: Uses a compiled regex scanner to catch adversarial override attempts (e.g., "ignore previous instructions", "reveal system prompt", "DAN mode"). When flagged, it triggers an early refusal without wasting API calls or tokens.
+- `prompts.py`: Loads Markdown prompt templates from `prompts/system_v1.md` and `prompts/repair_v1.md`. It injects variables like `{assistant_name}`, `{domain_focus}`, and `{json_schema}`, ensuring no unfilled placeholders remain.
+
+### 3. Interview Answer
+"In T3, we built an input security layer that strips non-printable control characters, caps input length, and wraps user prompts in explicit boundary tags. We coupled this with a deterministic prompt injection detector that intercepts adversarial jailbreaks at zero token cost. We also established file-based prompt templates with strict placeholder validation to ensure deterministic schema compliance."
