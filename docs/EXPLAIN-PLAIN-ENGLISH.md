@@ -108,3 +108,18 @@ Imagine calling a busy customer service line. If you get a busy signal (HTTP 429
 
 ### 3. Interview Answer
 "In T6, we engineered a resilience router that differentiates transient infrastructure faults from permanent authentication errors. It executes exponential backoff retries with doubling delays on 429 and 5xx errors while immediately cascading to fallback providers on 401s or retry exhaustion. By injecting a clock sleep function, we verify complex multi-provider failure state transitions deterministically in zero milliseconds."
+
+
+## T7: Chat Orchestrator and 1-Step JSON Self-Healing Repair
+
+### 1. Real-World Analogy
+Think of an editor at a publishing house. First, the security guard at the door inspects the manuscript; if someone submitted a trojan package (prompt injection), it's immediately intercepted and turned away without paying the author a cent. For valid submissions, the editor checks the formatting against a rigid style guide. If the text has a small formatting flaw, the editor sends back a quick correction note highlighting the exact mistake ("Missing chapter title") and asks for an immediate revision (`1-step repair`). If the second attempt is still broken, the editor substitutes a safe, standardized placeholder so the printing press never crashes.
+
+### 2. How It Works
+- `ChatOrchestrator`: Assembles the full dialogue turn pipeline: checks financial budget, sanitizes input, checks for injection patterns, prepares system prompt and multi-turn history, and dispatches generation to the `ResilientRouter`.
+- Injection Defense Short-Circuit: If prompt injection is detected, `chat.py` immediately returns a deterministic refusal `StructuredReply(category="refusal")` with 0 provider calls, 0 tokens consumed, and 0 memory pollution.
+- 1-Step JSON Self-Healing Repair: Strips markdown fences, then validates against `StructuredReply.model_validate_json()`. If validation fails, it generates a repair prompt with field-level error summaries (no user secrets echoed) and performs at most 1 repair call. If that fails, it falls back to a deterministic `StructuredReply`.
+- Accounting & Memory: Once a valid or repaired reply is produced, token consumption is recorded in `CostTracker`, the turn is appended to `ConversationMemory`, and an audit event is logged.
+
+### 3. Interview Answer
+"In T7, we tied together the entire conversational pipeline in ChatOrchestrator, implementing defense-in-depth against prompt injection and schema non-compliance. Known adversarial inputs short-circuit deterministically with zero model invocation, eliminating API cost. For schema malformations, we built a 1-step automated repair loop followed by an unbreakable fallback reply, guaranteeing that downstream consumer interfaces never crash on malformed LLM outputs."
