@@ -61,7 +61,7 @@ flowchart TD
 ## Quickstart
 
 ### Prerequisites
-- Python 3.12 or higher
+- Python 3.15 or higher
 - [uv](https://github.com/astral-sh/uv) (fast Python package manager)
 
 ```bash
