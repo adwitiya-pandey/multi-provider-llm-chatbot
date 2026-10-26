@@ -7,7 +7,7 @@ name = "multi-provider-llm-chatbot"
 version = "0.1.0"
 description = "Modular multi-provider LLM chatbot: Google GenAI, Anthropic & OpenAI SDK adapters, retry/fallback resilience, structured Pydantic outputs, token cost tracking, Streamlit UI"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.15"
 license = { text = "MIT" }
 authors = [
     { name = "Adwitiya Pandey", email = "76179646+adwitiya-pandey@users.noreply.github.com" }
