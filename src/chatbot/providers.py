@@ -69,7 +69,7 @@ class GeminiProvider:
 
     def __init__(
         self,
-        model_name: str = "gemini-2.5-flash",
+        model_name: str = "gemini-3.8-flash",
         api_key: str | None = None,
         sdk_client: Any | None = None,
     ) -> None:
@@ -87,6 +87,20 @@ class GeminiProvider:
                 retryable=False,
                 message="GEMINI_API_KEY is required for GeminiProvider",
             )
+
+    def list_models(self) -> list[str]:
+        """Lists available model names from Google GenAI API."""
+        try:
+            pager = self.client.models.list()
+            return [getattr(m, "name", str(m)) for m in pager]
+        except Exception as exc:
+            raise ProviderError(
+                code="API_ERROR",
+                provider=self.provider_name,
+                retryable=False,
+                message=str(exc),
+                original_exception=exc,
+            ) from exc
 
     def generate(
         self,

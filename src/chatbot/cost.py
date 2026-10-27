@@ -5,14 +5,24 @@ from typing import Any
 from chatbot.models import UsageStats
 
 # Pricing per 1,000,000 tokens (USD): (input_rate, output_rate)
+# Notional rates for testing and tracking; verified against official pricing on 2026-10-27
 DEFAULT_PRICING: dict[str, tuple[float, float]] = {
-    "gemini-2.5-flash": (0.15, 0.60),
-    "gemini-2.5-flash-lite": (0.075, 0.30),
-    "gemini-3.8-flash": (0.15, 0.60),
-    "gemini-3.5-flash-lite": (0.075, 0.30),
-    "claude-3-5-haiku-latest": (0.80, 4.00),
-    "gpt-4o-mini": (0.15, 0.60),
-    "scripted-demo": (0.15, 0.60),
+    "gemini-3.8-flash": (
+        0.15,
+        0.60,
+    ),  # Notional, verified on 2026-10-27 from https://ai.google.dev/pricing
+    "gemini-3.5-flash-lite": (
+        0.075,
+        0.30,
+    ),  # Notional, verified on 2026-10-27 from https://ai.google.dev/pricing
+    "gemini-2.5-flash": (0.15, 0.60),  # Legacy alias
+    "gemini-2.5-flash-lite": (0.075, 0.30),  # Legacy alias
+    "claude-3-5-haiku-latest": (
+        0.80,
+        4.00,
+    ),  # Verified on 2026-10-27 from https://www.anthropic.com/pricing
+    "gpt-4o-mini": (0.15, 0.60),  # Verified on 2026-10-27 from https://openai.com/api/pricing/
+    "scripted-demo": (0.15, 0.60),  # Notional (offline demo provider)
 }
 
 

@@ -47,14 +47,14 @@ flowchart TD
 
 ## Provider Fallback Matrix
 
-| Role | Default Model | Provider | Failure Trigger | Fallback Action |
-| :--- | :--- | :--- | :--- | :--- |
-| **Primary (Live)** | `gemini-2.5-flash` | Google GenAI | 429 / 5xx | Retry up to 3 times (1s, 2s, 4s backoff) |
-| **Primary (Live)** | `gemini-2.5-flash` | Google GenAI | 401 / Exhaustion | Immediate switch to Fallback |
-| **Fallback (Live)** | `gemini-2.5-flash-lite` | Google GenAI | Any Error | Fallback to offline `ScriptedProvider` |
-| **Alternative** | `claude-3-5-haiku-latest` | Anthropic SDK | Injected Offline | Mocked & verified in unit test suite |
-| **Alternative** | `gpt-4o-mini` | OpenAI SDK | Injected Offline | Mocked & verified in unit test suite |
-| **Offline Demo** | `scripted-demo` | Deterministic | N/A | Zero keys required, runs anywhere |
+| Role | Default Model | Provider | Failure Trigger | Fallback Action | Pricing (In / Out per 1M) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Primary (Live)** | `gemini-3.8-flash` | Google GenAI | 429 / 5xx | Retry up to 3 times (1s, 2s, 4s backoff) | $0.15 / $0.60 (notional, verified on 2026-10-27 from https://ai.google.dev/pricing) |
+| **Primary (Live)** | `gemini-3.8-flash` | Google GenAI | 401 / Exhaustion | Immediate switch to Fallback | $0.15 / $0.60 (notional, verified on 2026-10-27 from https://ai.google.dev/pricing) |
+| **Fallback (Live)** | `gemini-3.5-flash-lite` | Google GenAI | Any Error | Fallback to offline `ScriptedProvider` | $0.075 / $0.30 (notional, verified on 2026-10-27 from https://ai.google.dev/pricing) |
+| **Alternative** | `claude-3-5-haiku-latest` | Anthropic SDK | Injected Offline | Mocked & verified in unit test suite | $0.80 / $4.00 (verified on 2026-10-27 from https://www.anthropic.com/pricing) |
+| **Alternative** | `gpt-4o-mini` | OpenAI SDK | Injected Offline | Mocked & verified in unit test suite | $0.15 / $0.60 (verified on 2026-10-27 from https://openai.com/api/pricing/) |
+| **Offline Demo** | `scripted-demo` | Deterministic | N/A | Zero keys required, runs anywhere | $0.15 / $0.60 (notional) |
 
 ---
 
