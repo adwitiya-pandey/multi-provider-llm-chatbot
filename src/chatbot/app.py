@@ -81,6 +81,12 @@ def render_sidebar() -> str:
     with c2:
         st.metric("Total Tokens", summary["total_tokens"])
 
+    memory: ConversationMemory = st.session_state.memory
+    st.sidebar.caption(
+        f"context used: {memory.estimated_tokens} / {memory.max_estimated_tokens} estimated tokens "
+        "(approximate for non-OpenAI providers)"
+    )
+
     # Per-provider breakdown table
     cost_data = [
         {"Provider": p, "Cost (USD)": f"${cost:.5f}"}

@@ -5,13 +5,14 @@ import logging
 
 from pydantic import ValidationError
 
-from chatbot.cost import CostTracker
+from chatbot.cost import BudgetExceededError, CostTracker
 from chatbot.logging_setup import get_audit_logger, log_turn_event
 from chatbot.memory import ConversationMemory
 from chatbot.models import StructuredReply, TurnResult, UsageStats, UserTurnInput
 from chatbot.prompts import render_repair_prompt, render_system_prompt
 from chatbot.resilience import ResilientRouter
 from chatbot.sanitize import sanitize_input
+from chatbot.tokens import TokenCounter, get_counter
 
 
 def strip_markdown_code_fences(text: str) -> str:
@@ -71,9 +72,13 @@ class ChatOrchestrator:
         cost_tracker: CostTracker | None = None,
         assistant_name: str = "OmniBot",
         audit_logger: logging.Logger | None = None,
+        token_counter: TokenCounter | None = None,
     ) -> None:
         self.router = router
-        self.memory = memory if memory is not None else ConversationMemory()
+        self.token_counter = token_counter if token_counter is not None else get_counter()
+        self.memory = (
+            memory if memory is not None else ConversationMemory(counter=self.token_counter)
+        )
         self.cost_tracker = cost_tracker if cost_tracker is not None else CostTracker()
         self.assistant_name = assistant_name
         self.logger = audit_logger if audit_logger is not None else get_audit_logger()
@@ -125,6 +130,9 @@ class ChatOrchestrator:
                     "total_tokens": 0,
                     "cost_usd": 0.0,
                     "status": "refusal_injection",
+                    "token_estimate": 0,
+                    "token_counter": self.token_counter.name,
+                    "token_counter_approximate": self.token_counter.approximate,
                 },
             )
 
@@ -150,14 +158,40 @@ class ChatOrchestrator:
         current_user_message = {"role": "user", "content": sanitized.wrapped_text}
         messages = [*history_messages, current_user_message]
 
-        # Step 4: Dispatch via resilience router
+        # Step 4: Budget pre-check via TokenCounter
+        all_messages_for_counting = [
+            {"role": "system", "content": system_prompt},
+            *messages,
+        ]
+        estimated_input_tokens = self.token_counter.count_messages(all_messages_for_counting)
+
+        primary_model = (
+            self.router.providers[0].model_name if self.router.providers else "scripted-demo"
+        )
+        projected_input_cost = self.cost_tracker.calculate_cost(
+            model=primary_model,
+            input_tokens=estimated_input_tokens,
+            output_tokens=0,
+        )
+
+        if (
+            self.cost_tracker.total_cost_usd + projected_input_cost
+            > self.cost_tracker.session_budget_usd
+        ):
+            raise BudgetExceededError(
+                f"Session budget of ${self.cost_tracker.session_budget_usd:.4f} exceeded "
+                f"(current spend: ${self.cost_tracker.total_cost_usd:.4f}, "
+                f"projected input cost: ${projected_input_cost:.4f})"
+            )
+
+        # Step 5: Dispatch via resilience router
         router_result = self.router.generate(system_prompt, messages)
 
         total_input_tokens = router_result.response.input_tokens
         total_output_tokens = router_result.response.output_tokens
         repair_used = False
 
-        # Step 5: Parse Structured JSON output with 1-step repair retry
+        # Step 6: Parse Structured JSON output with 1-step repair retry
         cleaned_raw = strip_markdown_code_fences(router_result.response.raw_text)
 
         try:
@@ -188,7 +222,7 @@ class ChatOrchestrator:
                 # 1-step repair exhausted or failed: fallback to safe deterministic StructuredReply
                 structured_reply = create_safe_fallback_reply()
 
-        # Step 6: Record token consumption and costs
+        # Step 7: Record token consumption and costs
         usage = self.cost_tracker.record_turn(
             provider=router_result.provider_used,
             model=router_result.model_used,
@@ -196,10 +230,10 @@ class ChatOrchestrator:
             output_tokens=total_output_tokens,
         )
 
-        # Step 7: Update sliding-window conversation memory
+        # Step 8: Update sliding-window conversation memory
         self.memory.add_turn(user_input=user_input, reply=structured_reply, turn_id=turn_id)
 
-        # Step 8: Emit metadata-only audit log line
+        # Step 9: Emit metadata-only audit log line
         log_turn_event(
             self.logger,
             {
@@ -215,10 +249,13 @@ class ChatOrchestrator:
                 "total_tokens": total_input_tokens + total_output_tokens,
                 "cost_usd": usage.cost_usd,
                 "status": "success",
+                "token_estimate": estimated_input_tokens,
+                "token_counter": self.token_counter.name,
+                "token_counter_approximate": self.token_counter.approximate,
             },
         )
 
-        # Step 9: Return completed TurnResult
+        # Step 10: Return completed TurnResult
         return TurnResult(
             turn_id=turn_id,
             reply=structured_reply,

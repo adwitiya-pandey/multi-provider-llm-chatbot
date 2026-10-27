@@ -1,8 +1,10 @@
 """Sliding-window multi-turn conversation memory with turn and token limits."""
 
+import warnings
 from dataclasses import dataclass
 
 from chatbot.models import StructuredReply, UserTurnInput
+from chatbot.tokens import TokenCounter, get_counter
 
 
 @dataclass(frozen=True)
@@ -16,14 +18,27 @@ class MemoryTurn:
 
 
 def estimate_tokens(text: str) -> int:
-    """Conservatively estimates tokens as max(1, len(text) // 4)."""
+    """Conservatively estimates tokens as max(1, len(text) // 4).
+
+    Deprecated: Use TokenCounter implementations in chatbot.tokens instead.
+    """
+    warnings.warn(
+        "estimate_tokens is deprecated; use TokenCounter implementations in chatbot.tokens",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return max(1, len(text) // 4)
 
 
 class ConversationMemory:
     """Maintains a bounded sliding window of conversation turns."""
 
-    def __init__(self, max_turns: int = 10, max_estimated_tokens: int = 6000) -> None:
+    def __init__(
+        self,
+        max_turns: int = 10,
+        max_estimated_tokens: int = 6000,
+        counter: TokenCounter | None = None,
+    ) -> None:
         if max_turns < 1:
             raise ValueError("max_turns must be at least 1")
         if max_estimated_tokens < 100:
@@ -31,6 +46,7 @@ class ConversationMemory:
 
         self.max_turns = max_turns
         self.max_estimated_tokens = max_estimated_tokens
+        self.counter = counter if counter is not None else get_counter()
         self._turns: list[MemoryTurn] = []
 
     @property
@@ -57,7 +73,7 @@ class ConversationMemory:
         """Adds a completed turn and evicts oldest turns if limits are exceeded."""
         tid = turn_id or f"TURN-{self.turn_count + 1:04d}"
         reply_json = reply.model_dump_json()
-        turn_tokens = estimate_tokens(user_input.text) + estimate_tokens(reply_json)
+        turn_tokens = self.counter.count_text(user_input.text) + self.counter.count_text(reply_json)
 
         new_turn = MemoryTurn(
             turn_id=tid,
@@ -66,6 +82,27 @@ class ConversationMemory:
             estimated_tokens=turn_tokens,
         )
         self._turns.append(new_turn)
+        self._evict_if_needed()
+
+    def recount(self, counter: TokenCounter | None = None) -> None:
+        """Re-counts stored turns with the active/provided counter and re-evicts if needed."""
+        if counter is not None:
+            self.counter = counter
+        new_turns: list[MemoryTurn] = []
+        for turn in self._turns:
+            reply_json = turn.reply.model_dump_json()
+            turn_tokens = self.counter.count_text(turn.user_text) + self.counter.count_text(
+                reply_json
+            )
+            new_turns.append(
+                MemoryTurn(
+                    turn_id=turn.turn_id,
+                    user_text=turn.user_text,
+                    reply=turn.reply,
+                    estimated_tokens=turn_tokens,
+                )
+            )
+        self._turns = new_turns
         self._evict_if_needed()
 
     def _evict_if_needed(self) -> None:
