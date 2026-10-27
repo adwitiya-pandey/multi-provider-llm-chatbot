@@ -29,5 +29,13 @@ jobs:
       - name: Run Ruff Formatter Check
         run: uv run ruff format --check .
 
+      - name: Cache Tiktoken BPE Vocabulary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/tiktoken
+          key: ${{ runner.os }}-tiktoken-v1
+
       - name: Run Pytest with Coverage Gate (>=85%)
         run: uv run pytest -q --cov=src/chatbot --cov-report=term-missing --cov-fail-under=85
+        env:
+          TIKTOKEN_CACHE_DIR: /home/runner/.cache/tiktoken
