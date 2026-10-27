@@ -241,7 +241,7 @@ The system implements multi-layered defensive guardrails to protect system integ
 Every interaction generates a single metadata-only JSON line containing zero prompt or response text:
 
 ```json
-{"cost_usd": 0.000139, "fallback_used": true, "injection_flagged": false, "input_tokens": 585, "latency_ms": 13955.7, "level": "INFO", "model": "gemini-3.5-flash-lite", "output_tokens": 318, "provider": "gemini", "repair_used": false, "retries_used": 3, "status": "success", "timestamp": "2026-10-27T18:19:39.223492+00:00", "total_tokens": 903, "turn_id": "TURN-0001"}
+{"cost_usd": 0.000139, "fallback_used": true, "guardrail_triggered": false, "injection_flagged": false, "input_tokens": 585, "latency_ms": 13955.7, "level": "INFO", "model": "gemini-3.5-flash-lite", "output_tokens": 318, "provider": "gemini", "repair_used": false, "retries_used": 3, "status": "success", "timestamp": "2026-10-27T18:27:31.788153+00:00", "total_tokens": 903, "turn_id": "TURN-0001"}
 ```
 
 ---

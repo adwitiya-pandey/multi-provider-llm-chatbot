@@ -16,6 +16,7 @@ ALLOWED_LOG_KEYS = {
     "fallback_used",
     "repair_used",
     "injection_flagged",
+    "guardrail_triggered",
     "input_tokens",
     "output_tokens",
     "total_tokens",
