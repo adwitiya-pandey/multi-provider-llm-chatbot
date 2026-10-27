@@ -23,6 +23,10 @@ ALLOWED_LOG_KEYS = {
     "latency_ms",
     "status",
     "error_code",
+    "token_estimate",
+    "token_counter",
+    "token_counter_approximate",
+    "token_counter_fallback",
 }
 
 FORBIDDEN_KEY_PATTERNS = {

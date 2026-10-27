@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     MODEL_ANTHROPIC: str = Field(default="claude-3-5-haiku-latest")
     MODEL_OPENAI: str = Field(default="gpt-4o-mini")
 
+    # Token Counting Configuration
+    TOKEN_COUNTER: Literal["tiktoken", "heuristic"] = Field(default="tiktoken")
+    TIKTOKEN_CACHE_DIR: str | None = Field(default=None)
+
     @property
     def resolved_mode(self) -> Literal["live", "scripted"]:
         """Resolves active LLM mode based on configuration and available keys.
