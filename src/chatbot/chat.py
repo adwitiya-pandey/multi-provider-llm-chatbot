@@ -2,6 +2,7 @@
 
 import json
 import logging
+import time
 
 from pydantic import ValidationError
 
@@ -85,6 +86,8 @@ class ChatOrchestrator:
 
     def turn(self, user_input: UserTurnInput) -> TurnResult:
         """Executes a single conversational turn through the resilient pipeline."""
+        start_time = time.perf_counter()
+
         # Step 1: Pre-call financial guardrail check
         self.cost_tracker.check_budget()
 
@@ -114,6 +117,7 @@ class ChatOrchestrator:
             )
 
             usage = UsageStats(input_tokens=0, output_tokens=0, total_tokens=0, cost_usd=0.0)
+            latency_ms = round((time.perf_counter() - start_time) * 1000.0, 2)
 
             log_turn_event(
                 self.logger,
@@ -125,10 +129,12 @@ class ChatOrchestrator:
                     "fallback_used": False,
                     "repair_used": False,
                     "injection_flagged": True,
+                    "guardrail_triggered": True,
                     "input_tokens": 0,
                     "output_tokens": 0,
                     "total_tokens": 0,
                     "cost_usd": 0.0,
+                    "latency_ms": latency_ms,
                     "status": "refusal_injection",
                     "token_estimate": 0,
                     "token_counter": self.token_counter.name,
@@ -234,6 +240,7 @@ class ChatOrchestrator:
         self.memory.add_turn(user_input=user_input, reply=structured_reply, turn_id=turn_id)
 
         # Step 9: Emit metadata-only audit log line
+        latency_ms = round((time.perf_counter() - start_time) * 1000.0, 2)
         log_turn_event(
             self.logger,
             {
@@ -244,10 +251,12 @@ class ChatOrchestrator:
                 "fallback_used": router_result.fallback_used,
                 "repair_used": repair_used,
                 "injection_flagged": False,
+                "guardrail_triggered": False,
                 "input_tokens": total_input_tokens,
                 "output_tokens": total_output_tokens,
                 "total_tokens": total_input_tokens + total_output_tokens,
                 "cost_usd": usage.cost_usd,
+                "latency_ms": latency_ms,
                 "status": "success",
                 "token_estimate": estimated_input_tokens,
                 "token_counter": self.token_counter.name,

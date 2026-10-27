@@ -30,8 +30,8 @@ class Settings(BaseSettings):
     MAX_HISTORY_TOKENS: int = Field(default=6000, ge=100, le=100000)
 
     # Model IDs
-    PRIMARY_MODEL_GEMINI: str = Field(default="gemini-2.5-flash")
-    FALLBACK_MODEL_GEMINI: str = Field(default="gemini-2.5-flash-lite")
+    PRIMARY_MODEL_GEMINI: str = Field(default="gemini-3.8-flash")
+    FALLBACK_MODEL_GEMINI: str = Field(default="gemini-3.5-flash-lite")
     MODEL_ANTHROPIC: str = Field(default="claude-3-5-haiku-latest")
     MODEL_OPENAI: str = Field(default="gpt-4o-mini")
 
