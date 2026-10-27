@@ -94,3 +94,73 @@ def test_log_turn_event_helper() -> None:
     assert parsed["turn_id"] == "TURN-0003"
     assert parsed["status"] == "success"
     assert "Forbidden raw reply text" not in json_output
+
+
+def test_audit_log_fields_answer_all_governance_questions() -> None:
+    """Verifies audit log answers: provider, tokens in/out, cost, latency, fallback, guardrail."""
+    logger = get_audit_logger("test.governance")
+    metadata = {
+        "turn_id": "TURN-0010",
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "input_tokens": 450,
+        "output_tokens": 120,
+        "total_tokens": 570,
+        "cost_usd": 0.000075,
+        "latency_ms": 1250.5,
+        "fallback_used": True,
+        "guardrail_triggered": False,
+        "injection_flagged": False,
+        "retries_used": 1,
+        "repair_used": False,
+        "status": "success",
+    }
+    log_line = log_turn_event(logger, metadata)
+    parsed = json.loads(log_line)
+
+    # 1. Which provider answered
+    assert parsed["provider"] == "gemini"
+    assert parsed["model"] == "gemini-3.5-flash-lite"
+
+    # 2. Tokens in/out
+    assert parsed["input_tokens"] == 450
+    assert parsed["output_tokens"] == 120
+    assert parsed["total_tokens"] == 570
+
+    # 3. Cost
+    assert parsed["cost_usd"] == 0.000075
+
+    # 4. Latency
+    assert parsed["latency_ms"] == 1250.5
+
+    # 5. Fallback used
+    assert parsed["fallback_used"] is True
+
+    # 6. Guardrail triggered
+    assert parsed["guardrail_triggered"] is False
+
+
+def test_audit_log_guardrail_triggered_event() -> None:
+    """Verifies audit log correctly records guardrail interception events."""
+    logger = get_audit_logger("test.guardrail")
+    metadata = {
+        "turn_id": "TURN-0011",
+        "provider": "scripted",
+        "model": "security-gate",
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0.45,
+        "fallback_used": False,
+        "guardrail_triggered": True,
+        "injection_flagged": True,
+        "status": "refusal_injection",
+    }
+    log_line = log_turn_event(logger, metadata)
+    parsed = json.loads(log_line)
+
+    assert parsed["guardrail_triggered"] is True
+    assert parsed["injection_flagged"] is True
+    assert parsed["latency_ms"] == 0.45
+    assert parsed["status"] == "refusal_injection"

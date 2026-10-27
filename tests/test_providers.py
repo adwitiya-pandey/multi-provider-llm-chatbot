@@ -116,6 +116,25 @@ def test_gemini_provider_success() -> None:
     assert fake_client.models.last_call["model"] in ("gemini-2.5-flash", "gemini-3.8-flash")
 
 
+def test_gemini_provider_list_models() -> None:
+    class FakeModel:
+        def __init__(self, name: str) -> None:
+            self.name = name
+
+    class FakeModelsWithList(FakeGeminiModels):
+        def list(self) -> list[FakeModel]:
+            return [
+                FakeModel("models/gemini-3.8-flash"),
+                FakeModel("models/gemini-3.5-flash-lite"),
+            ]
+
+    fake_client = FakeGeminiClient()
+    fake_client.models = FakeModelsWithList()
+    provider = GeminiProvider(sdk_client=fake_client)
+    models = provider.list_models()
+    assert models == ["models/gemini-3.8-flash", "models/gemini-3.5-flash-lite"]
+
+
 def test_gemini_provider_rate_limit_mapping() -> None:
     # 429 APIError is retryable
     exc = genai_errors.APIError(429, {"message": "Resource exhausted"})
