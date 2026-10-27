@@ -16,6 +16,7 @@
 | **Step 4: Unit Tests** | Complete | `a85e4c9` | `test(tokens): add unit tests for token counting, overhead, fallback, and budget pre-check` |
 | **Step 5: Calibration** | Complete | `4324a62` | `test(calibration): calibrate token counts across 15 prompts against live Gemini model` |
 | **Step 6: Docs & CI** | Complete | `ef9a6b8` | `docs(readme,decisions,ci): update documentation, architecture diagram, ADR, and CI cache for tiktoken` |
+| **Merge Resolution** | Complete | `3c96d0e` | `merge: resolve merge conflicts with origin/main` |
 
 ---
 
@@ -53,28 +54,12 @@ All commands were executed directly in the repository environment (`WSL2 Ubuntu`
 
 ### 4. Full Pytest Suite with Coverage Enforcement (>=85%)
 - **Command**: `uv run pytest -q --cov=src/chatbot --cov-report=term-missing --cov-fail-under=85`
-- **Result**: PASS (82 passed, 0 failed, 4 warnings in 21.81s)
+- **Result**: PASS (87 passed, 0 failed, 4 warnings in 23.49s)
 - **Coverage Output**:
   ```text
-  Name                           Stmts   Miss Branch BrPart  Cover   Missing
-  --------------------------------------------------------------------------
-  src/chatbot/__init__.py            0      0      0      0   100%
-  src/chatbot/app.py               111     11     36      7    88%   31-35, 48-49, 124, 126, 139->144, 144->149, 203, 205, 208->exit
-  src/chatbot/chat.py               84      7     14      2    87%   22-29, 42
-  src/chatbot/config.py             33      0      6      0   100%
-  src/chatbot/cost.py               42      0      4      0   100%
-  src/chatbot/logging_setup.py      46      1     16      1    97%   83
-  src/chatbot/memory.py             58      1     14      1    97%   90
-  src/chatbot/models.py             42      1      2      1    95%   35
-  src/chatbot/prompts.py            36      2     16      2    92%   45, 66
-  src/chatbot/providers.py         174     43     40      7    73%   82, 147-151, 160-171, 195, 248-282, 306, 357-391, 424->429, 425->424, 447-457
-  src/chatbot/resilience.py         48      0      8      1    98%   65->61
-  src/chatbot/sanitize.py           26      0      8      0   100%
-  src/chatbot/tokens.py            118     14     42      7    87%   27-29, 35, 108, 109->111, 119, 159-160, 173, 197-208
-  --------------------------------------------------------------------------
-  TOTAL                            818     80    206     29    88%
-  Required test coverage of 85% reached. Total coverage: 88.18%
-  82 passed, 4 warnings in 21.81s
+  TOTAL                            828     82    206     29    88%
+  Required test coverage of 85% reached. Total coverage: 88.10%
+  87 passed, 4 warnings in 23.49s
   ```
 
 ### 5. Live Token Calibration (15 Prompts)
